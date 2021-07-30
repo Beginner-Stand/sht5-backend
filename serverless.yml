@@ -2,18 +2,46 @@ org: beginnerstand
 app: sht5-backend
 service: sht5-backend
 
-frameworkVersion: '2'
-
+frameworkVersion: "2"
 
 provider:
   name: aws
-  runtime: python3.8
-  lambdaHashingVersion: '20201221'
+  ecr:
+    images:
+      appimage:
+        path: ./
+  lambdaHashingVersion: "20201221"
+  stage: dev
+  region: ap-southeast-1
+
+package:
+  individually: true
+  patterns:
+    - "!node_modules/**"
+    - "!__pycache__/**"
+    - "!*.zip"
 
 functions:
   hello:
-    handler: handler.hello
+    image:
+      name: appimage
+      command:
+        - handler.hello
     events:
       - http:
-          path: /
+          path: /hello
           method: get
+  verify:
+    image:
+      name: appimage
+      command:
+        - dfhandler.verify
+    timeout: 120
+    events:
+      - http:
+          path: /verify
+          method: post
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
