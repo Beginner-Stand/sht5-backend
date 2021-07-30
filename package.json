@@ -2,8 +2,12 @@
   "name": "sht5-backend",
   "description": "",
   "version": "0.1.0",
-  "dependencies": {},
+  "dependencies": {
+    "@supabase/supabase-js": "1.21.0"
+  },
   "devDependencies": {
-    "serverless-python-requirements": "5.1.1"
+    "serverless-plugin-typescript": "1.1.9",
+    "serverless-python-requirements": "5.1.1",
+    "typescript": "4.3.5"
   }
 }

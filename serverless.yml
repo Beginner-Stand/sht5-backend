@@ -4,6 +4,8 @@ service: sht5-backend
 
 frameworkVersion: "2"
 
+useDotenv: true
+
 provider:
   name: aws
   ecr:
@@ -17,7 +19,6 @@ provider:
 package:
   individually: true
   patterns:
-    - "!node_modules/**"
     - "!__pycache__/**"
     - "!*.zip"
 
@@ -41,6 +42,18 @@ functions:
       - http:
           path: /verify
           method: post
+  upload:
+    runtime: nodejs14.x
+    handler: nodehandler.upload
+    events:
+      - http:
+          path: upload
+          method: post
+    environment:
+      SUPABASE_URL: ${env:SUPABASE_URL}
+      SUPABASE_KEY: ${env:SUPABASE_KEY}
+      ADMIN_EMAIL: ${env:ADMIN_EMAIL}
+      ADMIN_PASSWORD: ${env:ADMIN_PASSWORD}
 
 custom:
   pythonRequirements:

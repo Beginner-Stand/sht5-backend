@@ -21,3 +21,6 @@ var/
 
 # NPM node_modules
 node_modules
+
+.env
+.build
