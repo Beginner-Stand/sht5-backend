@@ -35,7 +35,7 @@ module.exports.getitem = async (event) => {
     })
   );
   const item = data.Item;
-  if (!item || !item.mean_r?.N || !item.mean_g?.N || !item.mean_b?.N) {
+  if (!item) {
     return {
       statusCode: 200,
       body: JSON.stringify({
@@ -47,30 +47,59 @@ module.exports.getitem = async (event) => {
       },
     };
   }
-  const meanR = parseInt(item.mean_r.N);
-  const meanG = parseInt(item.mean_g.N);
-  const meanB = parseInt(item.mean_b.N);
-  const name = colors
-    .map((color) => ({
-      name: color.name,
-      cosine:
-        (color.R * meanR + color.G * meanG + color.B * meanB) /
-        Math.sqrt(
-          (meanR * meanR + meanG * meanG + meanB * meanB) *
-            (color.R * color.R + color.G * color.G + color.B * color.B)
-        ),
-    }))
-    .sort((a, b) => a.cosine - b.cosine)[0].name;
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      color: name,
-    }),
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Credentials": true,
-    },
-  };
+  const isFMode =
+    item.mean_r?.N !== undefined &&
+    item.mean_g?.N !== undefined &&
+    item.mean_b?.N !== undefined;
+  const isOMode = item.distance?.N !== undefined;
+  if (!isFMode && !isOMode) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        color: "not found",
+      }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+    };
+  } else if (isFMode) {
+    const meanR = parseInt(item.mean_r.N);
+    const meanG = parseInt(item.mean_g.N);
+    const meanB = parseInt(item.mean_b.N);
+    const name = colors
+      .map((color) => ({
+        name: color.name,
+        cosine:
+          (color.R * meanR + color.G * meanG + color.B * meanB) /
+          Math.sqrt(
+            (meanR * meanR + meanG * meanG + meanB * meanB) *
+              (color.R * color.R + color.G * color.G + color.B * color.B)
+          ),
+      }))
+      .sort((a, b) => a.cosine - b.cosine)[0].name;
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        color: name,
+      }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+    };
+  } else {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        distance: item.distance?.N,
+      }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+    };
+  }
 };
 
 module.exports.upload = async (event) => {
