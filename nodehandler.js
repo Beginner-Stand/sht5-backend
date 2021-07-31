@@ -1,6 +1,13 @@
 const { createClient } = require("@supabase/supabase-js");
 const { decode } = require("base64-arraybuffer");
 const { v4 } = require("uuid");
+const {
+  EventBridgeClient,
+  PutEventsCommand,
+} = require("@aws-sdk/client-eventbridge");
+const mime = require("mime");
+
+const eventBridge = new EventBridgeClient({ region: "ap-southeast-1" });
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -29,10 +36,11 @@ module.exports.upload = async (event) => {
     filedata.indexOf(":") + 1,
     filedata.indexOf(";")
   );
+  const extension = mime.getExtension(mimeType);
   const base64data = filedata.replace(/^data:image\/\w+;base64,/, "");
   const { data, error: storageError } = await supabase.storage
     .from("default-bucket")
-    .upload(`admin/${fileName}`, decode(base64data), {
+    .upload(`admin/${fileName}.${extension}`, decode(base64data), {
       contentType: mimeType,
     });
   if (storageError) {
@@ -43,19 +51,33 @@ module.exports.upload = async (event) => {
   }
   const { signedURL, error: signedURLError } = await supabase.storage
     .from("default-bucket")
-    .createSignedUrl(`admin/${fileName}`, 3600);
+    .createSignedUrl(`admin/${fileName}.${extension}`, 3600);
   if (signedURLError) {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: signedURLError }),
     };
   }
+  const command = new PutEventsCommand({
+    Entries: [
+      {
+        Source: "nodehandler",
+        DetailType: "IMAGE_UPLOADED",
+        Detail: JSON.stringify({
+          url: signedURL,
+          ext: extension,
+        }),
+      },
+    ],
+  });
+  const response = await eventBridge.send(command);
   return {
     statusCode: 200,
     body: JSON.stringify(
       {
         name: fileName,
         url: signedURL,
+        response,
       },
       null,
       2

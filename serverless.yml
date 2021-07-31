@@ -15,6 +15,19 @@ provider:
   lambdaHashingVersion: "20201221"
   stage: dev
   region: ap-southeast-1
+  eventBridge:
+    useCloudFormation: true
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - events:PutEvents
+          Resource: "arn:aws:events:ap-southeast-1:*:event-bus/default"
+        - Effect: Allow
+          Action:
+            - lambda:RemovePermission
+          Resource: "arn:aws:events:ap-southeast-1:*:function:sht5-backend-dev-*"
 
 package:
   individually: true
@@ -39,9 +52,12 @@ functions:
         - dfhandler.verify
     timeout: 120
     events:
-      - http:
-          path: /verify
-          method: post
+      - eventBridge:
+          pattern:
+            detail-type:
+              - IMAGE_UPLOADED
+    environment:
+      TEMPLATE_IMAGE: ${env:TEMPLATE_IMAGE}
   upload:
     runtime: nodejs14.x
     handler: nodehandler.upload
