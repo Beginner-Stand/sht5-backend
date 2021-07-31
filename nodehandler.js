@@ -16,6 +16,15 @@ const supabase = createClient(
 
 module.exports.upload = async (event) => {
   const body = JSON.parse(event.body);
+  const uploadType = body.type;
+  if (uploadType !== "O" && uploadType !== "F") {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: `upload type ${uploadType} not recognized`,
+      }),
+    };
+  }
   const {
     user,
     session,
@@ -62,7 +71,7 @@ module.exports.upload = async (event) => {
     Entries: [
       {
         Source: "nodehandler",
-        DetailType: "IMAGE_UPLOADED",
+        DetailType: `IMAGE_${uploadType}_UPLOADED`,
         Detail: JSON.stringify({
           id: fileName,
           url: signedURL,

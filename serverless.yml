@@ -65,9 +65,21 @@ functions:
       - eventBridge:
           pattern:
             detail-type:
-              - IMAGE_UPLOADED
+              - IMAGE_O_UPLOADED
     environment:
       TEMPLATE_IMAGE: ${env:TEMPLATE_IMAGE}
+  extractcolor:
+    image:
+      name: appimage
+      command:
+        - cvhandler.extractcolor
+    timeout: 90
+    memorySize: 4096
+    events:
+      - eventBridge:
+          pattern:
+            detail-type:
+              - IMAGE_F_UPLOADED
   upload:
     runtime: nodejs14.x
     handler: nodehandler.upload

@@ -1,8 +1,7 @@
 import os
 import json
 from deepface import DeepFace
-import urllib.request
-import uuid
+from util import prep_image
 import time
 from decimal import Decimal
 import json
@@ -17,16 +16,6 @@ TEMPLATE_IMAGE = os.environ['TEMPLATE_IMAGE']
 BACKENDS = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface']
 MODELS = ["VGG-Face", "Facenet", "Facenet512",
           "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib"]
-
-
-def prep_image(img, ext='png'):
-    if not isinstance(img, str) or img[:4] != 'http':
-        return img
-    # Otherwise, fetch the image
-    fname = uuid.uuid4()
-    fullname = f'/tmp/{fname}.{ext}'
-    urllib.request.urlretrieve(img, fullname)
-    return fullname
 
 
 def verify(event, context):
