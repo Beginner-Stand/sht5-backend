@@ -19,6 +19,10 @@ module.exports.getitem = async (event) => {
       body: JSON.stringify({
         error: "id not found in request query",
       }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
     };
   }
   const data = await ddbClient.send(
@@ -34,6 +38,10 @@ module.exports.getitem = async (event) => {
     body: JSON.stringify({
       data,
     }),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
   };
 };
 
@@ -50,6 +58,10 @@ module.exports.upload = async (event) => {
       body: JSON.stringify({
         error: `upload type ${uploadType} not recognized`,
       }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
     };
   }
   const {
@@ -64,6 +76,10 @@ module.exports.upload = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: userError }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
     };
   }
   const fileName = v4();
@@ -83,6 +99,10 @@ module.exports.upload = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: storageError }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
     };
   }
   const { signedURL, error: signedURLError } = await supabase.storage
@@ -92,6 +112,10 @@ module.exports.upload = async (event) => {
     return {
       statusCode: 500,
       body: JSON.stringify({ error: signedURLError }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
     };
   }
   const command = new PutEventsCommand({
@@ -110,14 +134,14 @@ module.exports.upload = async (event) => {
   const response = await eventBridge.send(command);
   return {
     statusCode: 200,
-    body: JSON.stringify(
-      {
-        id: fileName,
-        url: signedURL,
-        response,
-      },
-      null,
-      2
-    ),
+    body: JSON.stringify({
+      id: fileName,
+      url: signedURL,
+      response,
+    }),
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Credentials": true,
+    },
   };
 };
