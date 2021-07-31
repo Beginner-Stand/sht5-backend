@@ -92,6 +92,13 @@ functions:
       SUPABASE_KEY: ${env:SUPABASE_KEY}
       ADMIN_EMAIL: ${env:ADMIN_EMAIL}
       ADMIN_PASSWORD: ${env:ADMIN_PASSWORD}
+  getitem:
+    runtime: nodejs14.x
+    handler: nodehandler.getitem
+    events:
+      - http:
+          path: getitem
+          method: get
 
 custom:
   pythonRequirements:
@@ -104,10 +111,10 @@ resources:
       DeletionPolicy: Retain
       Properties:
         AttributeDefinitions:
-          - AttributeName: id
+          - AttributeName: PK
             AttributeType: S
         KeySchema:
-          - AttributeName: id
+          - AttributeName: PK
             KeyType: HASH
         ProvisionedThroughput:
           ReadCapacityUnits: 1

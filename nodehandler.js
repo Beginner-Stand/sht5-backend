@@ -5,16 +5,43 @@ const {
   EventBridgeClient,
   PutEventsCommand,
 } = require("@aws-sdk/client-eventbridge");
+const { DynamoDBClient, GetItemCommand } = require("@aws-sdk/client-dynamodb");
 const mime = require("mime");
 
+const ddbClient = new DynamoDBClient({ region: "ap-southeast-1" });
 const eventBridge = new EventBridgeClient({ region: "ap-southeast-1" });
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_KEY
-);
+module.exports.getitem = async (event) => {
+  const id = event?.queryStringParameters?.id;
+  if (!id) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({
+        error: "id not found in request query",
+      }),
+    };
+  }
+  const data = await ddbClient.send(
+    new GetItemCommand({
+      TableName: "sht5-table",
+      Key: {
+        PK: { S: id },
+      },
+    })
+  );
+  return {
+    statusCode: 200,
+    body: JSON.stringify({
+      data,
+    }),
+  };
+};
 
 module.exports.upload = async (event) => {
+  const supabase = createClient(
+    process.env.SUPABASE_URL,
+    process.env.SUPABASE_KEY
+  );
   const body = JSON.parse(event.body);
   const uploadType = body.type;
   if (uploadType !== "O" && uploadType !== "F") {
