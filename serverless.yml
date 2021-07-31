@@ -28,6 +28,15 @@ provider:
           Action:
             - lambda:RemovePermission
           Resource: "arn:aws:events:ap-southeast-1:*:function:sht5-backend-dev-*"
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource: "arn:aws:dynamodb:ap-southeast-1:*:table/sht5-table"
 
 package:
   individually: true
@@ -51,6 +60,7 @@ functions:
       command:
         - dfhandler.verify
     timeout: 120
+    memorySize: 8192
     events:
       - eventBridge:
           pattern:
@@ -74,3 +84,20 @@ functions:
 custom:
   pythonRequirements:
     dockerizePip: non-linux
+
+resources:
+  Resources:
+    DynamoDbTable:
+      Type: "AWS::DynamoDB::Table"
+      DeletionPolicy: Retain
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: sht5-table

@@ -64,6 +64,7 @@ module.exports.upload = async (event) => {
         Source: "nodehandler",
         DetailType: "IMAGE_UPLOADED",
         Detail: JSON.stringify({
+          id: fileName,
           url: signedURL,
           ext: extension,
         }),
@@ -75,7 +76,7 @@ module.exports.upload = async (event) => {
     statusCode: 200,
     body: JSON.stringify(
       {
-        name: fileName,
+        id: fileName,
         url: signedURL,
         response,
       },
