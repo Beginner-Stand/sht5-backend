@@ -10,6 +10,7 @@ const mime = require("mime");
 
 const ddbClient = new DynamoDBClient({ region: "ap-southeast-1" });
 const eventBridge = new EventBridgeClient({ region: "ap-southeast-1" });
+const colors = require("./colors.json");
 
 module.exports.getitem = async (event) => {
   const id = event?.queryStringParameters?.id;
@@ -33,10 +34,37 @@ module.exports.getitem = async (event) => {
       },
     })
   );
+  const item = data.Item;
+  if (!item || !item.mean_r?.N || !item.mean_g?.N || !item.mean_b?.N) {
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        color: "not found",
+      }),
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Credentials": true,
+      },
+    };
+  }
+  const meanR = parseInt(item.mean_r.N);
+  const meanG = parseInt(item.mean_g.N);
+  const meanB = parseInt(item.mean_b.N);
+  const name = colors
+    .map((color) => ({
+      name: color.name,
+      cosine:
+        (color.R * meanR + color.G * meanG + color.B * meanB) /
+        Math.sqrt(
+          (meanR * meanR + meanG * meanG + meanB * meanB) *
+            (color.R * color.R + color.G * color.G + color.B * color.B)
+        ),
+    }))
+    .sort((a, b) => a.cosine - b.cosine)[0].name;
   return {
     statusCode: 200,
     body: JSON.stringify({
-      data,
+      color: name,
     }),
     headers: {
       "Access-Control-Allow-Origin": "*",
