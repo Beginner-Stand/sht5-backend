@@ -32,8 +32,8 @@ def iterate(im, means):
 def extractcolor(event, context):
     uploaded_image = prep_image(event['detail']['url'], event['detail']['ext'])
     im = cv.imread(uploaded_image)
-    if event['detail']['ext'].lower() == 'jpg' or event['detail']['ext'].lower() == 'jpeg':
-        im = cv.cvtColor(im, cv.COLOR_BGR2RGB)
+    # if event['detail']['ext'].lower() == 'jpg' or event['detail']['ext'].lower() == 'jpeg':
+    im = cv.cvtColor(im, cv.COLOR_BGR2RGB)
     if len(im) > 150 or len(im[0]) > 150:
         # Compress if too large
         im = cv.resize(im, (min((150, len(im))), min((150, len(im[0])))))

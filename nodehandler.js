@@ -77,7 +77,7 @@ module.exports.getitem = async (event) => {
               (color.R * color.R + color.G * color.G + color.B * color.B)
           ),
       }))
-      .sort((a, b) => a.cosine - b.cosine)[0].name;
+      .sort((a, b) => b.cosine - a.cosine)[0].name;
     return {
       statusCode: 200,
       body: JSON.stringify({
