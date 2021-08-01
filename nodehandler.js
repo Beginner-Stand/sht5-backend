@@ -51,7 +51,7 @@ module.exports.getitem = async (event) => {
     item.mean_r?.N !== undefined &&
     item.mean_g?.N !== undefined &&
     item.mean_b?.N !== undefined;
-  const isOMode = item.distance?.N !== undefined;
+  const isOMode = item.distance?.N !== undefined || item.error?.S !== undefined;
   if (!isFMode && !isOMode) {
     return {
       statusCode: 200,
@@ -93,6 +93,7 @@ module.exports.getitem = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         distance: item.distance?.N,
+        dferror: item.error?.S,
       }),
       headers: {
         "Access-Control-Allow-Origin": "*",

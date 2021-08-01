@@ -12,6 +12,7 @@ dynamodb = boto3.resource('dynamodb')
 os.environ['CUDA_VISIBLE_DEVICES'] = "-1"
 
 TEMPLATE_IMAGE = os.environ['TEMPLATE_IMAGE']
+TEMPLATE_IMAGE2 = os.environ['TEMPLATE_IMAGE2']
 
 BACKENDS = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface']
 MODELS = ["VGG-Face", "Facenet", "Facenet512",
@@ -21,8 +22,14 @@ MODELS = ["VGG-Face", "Facenet", "Facenet512",
 def verify(event, context):
     uploaded_image = prep_image(event['detail']['url'], event['detail']['ext'])
     template_image = prep_image(TEMPLATE_IMAGE)
-    obj = DeepFace.verify(template_image, uploaded_image,
-                          detector_backend=BACKENDS[4], model_name=MODELS[-2], distance_metric='cosine')
+    template_image2 = prep_image(TEMPLATE_IMAGE2)
+    try:
+        obj = DeepFace.verify(template_image, uploaded_image,
+                              detector_backend=BACKENDS[4], model_name=MODELS[-2], distance_metric='cosine')
+        obj['distance'] *= DeepFace.verify(template_image2, uploaded_image, detector_backend=BACKENDS[4],
+                                           model_name=MODELS[-2], distance_metric='cosine')['distance']
+    except:
+        obj = {'error': 'something went wrong'}
     body = {
         "message": obj,
         "input": event,

@@ -69,6 +69,7 @@ functions:
               - IMAGE_O_UPLOADED
     environment:
       TEMPLATE_IMAGE: ${env:TEMPLATE_IMAGE}
+      TEMPLATE_IMAGE2: ${env:TEMPLATE_IMAGE2}
   extractcolor:
     image:
       name: appimage
